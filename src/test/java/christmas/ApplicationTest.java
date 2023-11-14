@@ -49,6 +49,46 @@ class ApplicationTest extends NsTest {
         });
     }
 
+    @Test
+    void 주문_수량_테스트() {
+        assertSimpleTest(() -> {
+            runException("3", "제로콜라-21");
+            assertThat(output()).contains("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+        });
+    }
+
+    @Test
+    void 주문_정규식_테스트() {
+        assertSimpleTest(() -> {
+            runException("3", "addd,adfds");
+            assertThat(output()).contains("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+        });
+    }
+
+    @Test
+    void 음료만_주문_테스트() {
+        assertSimpleTest(() -> {
+            runException("3", "제로콜라-10,샴페인-5");
+            assertThat(output()).contains("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+        });
+    }
+
+    @Test
+    void 없는_메뉴_테스트() {
+        assertSimpleTest(() -> {
+            runException("3", "삼겹살-10,치킨-5");
+            assertThat(output()).contains("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+        });
+    }
+
+    @Test
+    void 빈값_테스트() {
+        assertSimpleTest(() -> {
+            runException("3", " ");
+            assertThat(output()).contains("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+        });
+    }
+
     @Override
     protected void runMain() {
         Application.main(new String[]{});
