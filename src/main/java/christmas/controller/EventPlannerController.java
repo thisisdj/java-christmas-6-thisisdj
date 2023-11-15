@@ -1,7 +1,6 @@
 package christmas.controller;
 
 import christmas.domain.Order;
-import christmas.domain.Planner;
 import christmas.view.InputView;
 import christmas.view.OutputView;
 
@@ -30,7 +29,7 @@ public class EventPlannerController {
 
         while (true) {
             try {
-                order = new Order(inputView.printMenuSelect());
+                order = new Order(inputView.printMenuSelect(), date);
                 break;
             } catch (IllegalArgumentException ex) {
                 System.out.println(ex.getMessage());
@@ -39,7 +38,10 @@ public class EventPlannerController {
 
         outputView.printOrderList(order);
         outputView.printOrderTotalPrice(order);
-
-        Planner plan = new Planner(date, order);
+        outputView.printGift(order);
+        outputView.printDiscountList(order);
+        outputView.printTotalDiscount(order);
+        outputView.printAfterDiscount(order);
+        outputView.printEventBadge(order);
     }
 }

@@ -26,6 +26,8 @@ public enum Menu {
     private final int price;
     private final MenuType type;
 
+    private static final String MENU_ERROR = "[ERROR] 해당 메뉴를 찾을 수 없습니다.";
+
     Menu(String name, int price, MenuType type) {
         this.name = name;
         this.price = price;
@@ -42,5 +44,15 @@ public enum Menu {
 
     public MenuType getType() {
         return type;
+    }
+
+    public static Menu findMenuByName(String name) {
+        for (Menu menu : Menu.values()) {
+            if (menu.getName().equals(name)) {
+                return menu;
+            }
+        }
+
+        throw new IllegalArgumentException(MENU_ERROR);
     }
 }

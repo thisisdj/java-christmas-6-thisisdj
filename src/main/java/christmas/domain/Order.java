@@ -2,25 +2,60 @@ package christmas.domain;
 
 import christmas.Message;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Order {
 
     private final Map<Menu, Integer> bill = new EnumMap<>(Menu.class);
+    private final Map<DiscountType, Integer> discounts = new EnumMap<>(DiscountType.class);
+    private int totalPrice;
+    private int totalDiscountPrice;
+    private int totalRealDiscountPrice;
 
-    public Order(String[] orders) {
+    public Order(String[] orders, int date) {
         for (Menu menu : Menu.values()) {
             bill.put(menu, 0);
         }
 
         addOrders(orders);
+        setTotalPrice();
+
+        discounts.put(DiscountType.D_DAY_DISCOUNT, Discounter.getDdayDiscount(date));
+        discounts.put(DiscountType.WEEKDAY_DISCOUNT, Discounter.getWeekDayDiscount(bill, date));
+        discounts.put(DiscountType.WEEKEND_DISCOUNT, Discounter.getWeekendDiscount(bill, date));
+        discounts.put(DiscountType.SPECIAL_DISCOUNT, Discounter.getSpecialDiscount(date));
+        discounts.put(DiscountType.GIFT_EVENT, Discounter.getGiftDiscount(findUserGift(), getTotalPrice()));
+
+        setTotalDiscountPrice(discounts);
+    }
+
+    public Map<DiscountType, Integer> getDiscounts() {
+        return new EnumMap<>(discounts);
+    }
+
+    public int getTotalDiscountPrice() {
+        return totalDiscountPrice;
+    }
+
+    public int getTotalRealDiscountPrice() {
+        return totalRealDiscountPrice;
     }
 
     public Map<Menu, Integer> getBill() {
         return new EnumMap<>(bill);
+    }
+
+    private void setTotalDiscountPrice(Map<DiscountType, Integer> discounts) {
+        int totalDiscountPrice = 0, totalRealDiscountPrice = 0;
+        for (DiscountType type : discounts.keySet()) {
+            if (type.isAffectPrice()) {
+                totalRealDiscountPrice += discounts.get(type);
+            }
+            totalDiscountPrice += discounts.get(type);
+        }
+
+        this.totalDiscountPrice = totalDiscountPrice;
+        this.totalRealDiscountPrice = totalRealDiscountPrice;
     }
 
     private void addOrders(String[] orders) {
@@ -46,13 +81,17 @@ public class Order {
     }
 
     public int getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice() {
         int totalPrice = 0;
 
         for (Menu menu : bill.keySet()) {
             totalPrice += menu.getPrice() * bill.get(menu);
         }
 
-        return totalPrice;
+        this.totalPrice = totalPrice;
     }
 
     private Menu getMenu(String menuName) {
@@ -79,5 +118,16 @@ public class Order {
         if (totalOrderQuantity > 20 || totalOrderQuantity == drinkOrderQuantity) {
             throw new IllegalArgumentException(Message.NOT_VALID_ORDER.getMessage());
         }
+    }
+
+    public List<Gift> findUserGift() {
+        List<Gift> giftList = new ArrayList<>();
+        for (Gift gift : Gift.values()) {
+            if (totalPrice >= gift.getStandardAmount()) {
+                giftList.add(gift);
+            }
+        }
+
+        return giftList;
     }
 }
