@@ -89,6 +89,22 @@ class ApplicationTest extends NsTest {
         });
     }
 
+    @Test
+    void 주말_할인_테스트() {
+        assertSimpleTest(() -> {
+            run("23", "타파스-2,티본스테이크-2");
+            assertThat(output()).contains("주말 할인");
+        });
+    }
+
+    @Test
+    void 크리스마스_넘어가면_디데이_미적용() {
+        assertSimpleTest(() -> {
+            run("28", "타파스-2,티본스테이크-2");
+            assertThat(output()).doesNotContain("크리스마스 디데이");
+        });
+    }
+
     @Override
     protected void runMain() {
         Application.main(new String[]{});
